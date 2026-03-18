@@ -23,7 +23,7 @@ ImpedanceValues = 10.^(ImpedanceValues./20);
 
 
 %plot of empirical data without points
-figure(3);
+figure(1);
 hold on;
 plt = plot(FreqValues,ImpedanceValues, color = 'r'); % Mock
 xscale("log");
@@ -45,7 +45,7 @@ p3 = datatip(plt, 25e4, 38);
 if speaker_name == "supro_tb15"
     R_E = 10.5;
 elseif speaker_name == "celestion_g12t_100"
-    R_E = 7.65;
+    R_E = 7.64;
 else
     error("invalid speaker_name")
 end
@@ -70,16 +70,24 @@ fs = FreqValues(find(ImpedanceValues(1:find(FreqValues > 200, 1), 1) == max(Impe
 % get data points directly from the graph
 % these get deleted when running individual sections and kinda breaks the
 % matlab how fun.
-figure(8);
+figure(2);
 plt3d = plot3(FreqValues, ImpedanceValues, PhaseValues);
 p1_3d = datatip(plt3d, 4.04e3, 16.9, 35.6); %index 375
 p2_3d = datatip(plt3d, 1.01e4, 25.58, 39.2); %index 432
 p3_3d = datatip(plt3d, 2.51e4, 38.1, 41.32); %index 489
 
-w1 = p2_3d.X*2*pi
-z1 = p2_3d.Y*exp(j*pi*p2_3d.Z/180)
-w2 = p3_3d.X*2*pi
-z2 = p3_3d.Y*exp(j*pi*p3_3d.Z/180)
+w1 = p2_3d.X*2*pi;
+disp("-----------------------------")
+disp("w1 = "+w1)
+z1 = p2_3d.Y*exp(j*pi*p2_3d.Z/180);
+disp("-----------------------------")
+disp("z1 = "+z1)
+w2 = p3_3d.X*2*pi;
+disp("-----------------------------")
+disp("w2 = "+w2)
+z2 = p3_3d.Y*exp(j*pi*p3_3d.Z/180);
+disp("-----------------------------")
+disp("z2 = "+z2)
 
 y1 = 1/z1;
 y2 = 1/z2;
@@ -89,12 +97,16 @@ n = log10(p3_3d.Y/p2_3d.Y)/(log10(p3_3d.X/p2_3d.X));
 
 % calculate L_e
 % L_e = abs((1/((j*p2.X*2*pi)^n)) * (p2.Y - R_E - K*((j*2*pi*p2.X/(ws*Qms))/((j*2*pi*p2.X/ws)^2+(j*2*pi*p2.X/(ws*Qms))+1))));
-L_e = cos(n*pi/2)/(w1^n*real(y1))
+L_e = cos(n*pi/2)/(w1^n*real(y1));
+disp("-----------------------------")
+disp("L_e = "+L_e)
 
 % calculate L_E
 % L_E = p3.Y/p3.X; % non-lossy inductor = Z_measured / w
 
-L_E = (1)/((imag(y1)+(sin(n*pi/2)/(L_e*w1^n)))*w1)
+L_E = (1)/((imag(y1)+(sin(n*pi/2)/(L_e*w1^n)))*w1);
+disp("-----------------------------")
+disp("L_E = "+L_E)
 
 Qms = (fs/(f2-f1))*sqrt((R_E+R_ES)/(R_E));
 Qes = Qms*(R_E/R_ES);
@@ -138,7 +150,7 @@ BOX_FreqValues = table2array(BOX_FreqValues);
 BOX_ImpedanceValues = table2array(BOX_ImpedanceValues);
 
 % plot the data
-figure(4);
+figure(3);
 hold on;
 plot(BOX_FreqValues,BOX_ImpedanceValues, color = 'r'); % Mock
 xscale("log");
@@ -179,7 +191,10 @@ VAS = BOX_VAB * alpha;
 %% Table of Small Signal Parameters
 Parameter_Values = [ws;Qts;Qes;Qms;VAS];
 parameter_names = {'ws';'Qts';'Qes';'Qms';'Vas'};
-Small_Signal_Parameters_Table = table(Parameter_Values, RowNames=parameter_names)
+Small_Signal_Parameters_Table = table(Parameter_Values, RowNames=parameter_names);
+disp("-----------------------------")
+disp("Small_Signal_Parameters_Table")
+disp(Small_Signal_Parameters_Table)
 
 
 %% Sanity Checking; Plotting Modeled System on top of Empirical
@@ -200,7 +215,7 @@ Tf2 = ((L_E*s).*(L_e*(s.^n)))./((L_E*s)+(L_e*(s.^n))); %parallel combination of 
 
 Model = abs(Tf0+Tf1+Tf2);
 
-figure(5);
+figure(4);
 hold on;
 plot(FreqValues,ImpedanceValues, color = 'r'); % Mock
 xscale("log");
@@ -226,7 +241,7 @@ Tf2 = ((L_E*s).*(L_e*(s.^n)))./((L_E*s)+(L_e*(s.^n)));
 Model = abs(Tf0+Tf1+Tf2);
 
 % re-plotting with fixed L_e
-figure(7)
+figure(5)
 hold on
 plot(FreqValues,ImpedanceValues, color = 'r');
 plot(FreqValues, Model, color = 'g');
@@ -287,15 +302,22 @@ M_MD = (M_AS - (16*p0)/(3*a*pi^2))*(S_D^2);
 %% Table of Three Part Model Parameters
 Parameter_Values = [S_D;R_E;(L_E*L_e)/(L_E+L_e);Bl;R_MS;C_MS;M_MD];
 parameter_names = {'S_D';'R_E';'L_E||L_e';'Bl';'R_MS';'C_MS';'M_MD'};
-Three_Part_Model_Parameters_Table = table(Parameter_Values, RowNames=parameter_names)
+Three_Part_Model_Parameters_Table = table(Parameter_Values, RowNames=parameter_names);
+disp("-----------------------------")
+disp("Three_Part_Model_Parameters_Table")
+disp(Three_Part_Model_Parameters_Table)
 
 
 %% Calculate box_alpha
 % Qts*alpha = Qtc = 1/sqrt(2)
-box_alpha = 1/(sqrt(2)*Qts)
+box_alpha = 1/(sqrt(2)*Qts);
+VAB = VAS/box_alpha;
+disp("-----------------------------")
+disp("VAB = "+VAB+" m^2")
+disp("-----------------------------")
+disp("VAB = "+(VAB*35.3147)+" ft^2")
 
-
-error("end of script");
+error("End of Script. No Multisim Data!");
 
 %% SPL plots and Calcs
 multiSim_data1 = readtable('pressure_no_vc_inductance.csv','VariableNamingRule','preserve');
